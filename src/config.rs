@@ -1090,10 +1090,11 @@ impl Config {
 
     fn find_is_built_file_in_package(&self, rel_path: &Path, expected_kind: &str) -> IsBuilt {
         let source_name = rel_path.file_name().expect("asset filename").to_str().expect("utf-8 names");
-        let source_name = source_name.strip_suffix(EXE_SUFFIX).unwrap_or(source_name);
+        let source_name_bin = source_name.strip_suffix(EXE_SUFFIX).unwrap_or(source_name);
+        let source_name_dll = source_name.strip_suffix(DLL_SUFFIX).map(|s| s.strip_prefix(DLL_PREFIX)).flatten().unwrap_or(source_name);
 
         if self.build_targets.iter()
-            .filter(|t| t.name == source_name && t.kind.iter().any(|k| k == expected_kind))
+            .filter(|t| t.name == source_name_bin || t.name == source_name_dll)
             .any(|t| self.is_built_file_in_package(t) == IsBuilt::SamePackage)
         {
             IsBuilt::SamePackage
